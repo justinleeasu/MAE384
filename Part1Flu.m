@@ -1,5 +1,5 @@
 Beta = 0.3;
-Lambda = 0.1;
+Gamma = 0.1;
 
 a = 1;
 b = 100;
@@ -18,15 +18,10 @@ Recovered(1) = 0;
 
 N = Susceptible(1)+Infected(1)+Recovered(1);
 
-
-%Use I(0) to find S(i+1) because I(0) is a constant. So use -B*I(0)/N as a
-%constant then dS/dt = C*S(t) and then use Runge-Kutta to find S(i+1). Then
-%use dI/dt = C*I(t)-Lambda*I(t) to find B*S(0)/N
-
 for i = 1:n
     dS = @(T,S) (-Beta/N)*S*Infected(i);
-    dI = @(T,I) (Beta/N)*Susceptible(i)*I - Lambda*I;
-    dR = @(T,I) Lambda*Infected(i);
+    dI = @(T,I) (Beta/N)*Susceptible(i)*I - Gamma*I;
+    dR = @(T,I) Gamma*Infected(i);
     T(i+1) = T(i)+h;
     Susceptible(i+1) = RungeKutta(dS,T(i),Susceptible(i),h);
     Infected(i+1) = RungeKutta(dI,T(i),Infected(i),h);
