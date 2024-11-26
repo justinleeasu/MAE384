@@ -8,7 +8,7 @@ n = (b-a)/h;
 n = n+1;
 
 T = zeros(1,n+1);
-T(1) = a;
+T(1) = a-h;
 
 Susceptible = zeros(1,n+1);
 Infected = zeros(1,n+1);
