@@ -1,0 +1,70 @@
+clear;
+clc;
+Beta = 0.3;
+Gamma = 0.1;
+
+a = 1;
+b = 100;
+h = 2;
+n = 50;
+
+linNewsus = zeros(1,b+1);
+linNewsus(1) = 990;
+linNewinf = zeros(1,b+1);
+linNewinf(1) = 10;
+linNewrec = zeros(1,b+1);
+linNewrec(1) = 0;
+
+quadNewsus = zeros(1,b+1);
+quadNewsus(1) = 990;
+quadlinNewinf = zeros(1,b+1);
+quadlinNewinf(1) = 10;
+quadlinNewrec = zeros(1,b+1);
+quadlinNewrec(1) = 0;
+
+
+T = zeros(1,n+1);
+T(1) = a;
+t = 0:1:100;
+
+Susceptible = zeros(1,n+1);
+Infected = zeros(1,n+1);
+Recovered = zeros(1,n+1);
+Susceptible(1) = 990;
+Infected(1) = 10;
+Recovered(1) = 0;
+
+N = Susceptible(1)+Infected(1)+Recovered(1);
+
+for i = 1:n
+    dS = @(T,S) (-Beta/N)*S*Infected(i);
+    dI = @(T,I) (Beta/N)*Susceptible(i)*I - Gamma*I;
+    dR = @(T,I) Gamma*Infected(i);
+    T(i+1) = T(i)+h;
+    Susceptible(i+1) = RungeKutta(dS,T(i),Susceptible(i),h);
+    Infected(i+1) = RungeKutta(dI,T(i),Infected(i),h);
+    Recovered(i+1) = RungeKutta(dR,T(i),Recovered(i),h);
+   
+end
+
+function [X] = RungeKutta(dYdX,Xi,Yi,h)
+    k1 = dYdX(Xi,Yi);
+    k2 = dYdX(Xi+0.5*h,Yi+0.5*k1*h);
+    k3 = dYdX(Xi+0.5*h,Yi+0.5*k2*h);
+    k4 = dYdX(Xi+h,Yi+k3*h);
+    X = Yi + (1/6)*(k1+2*k2+2*k3+k4)*h;
+end
+
+
+for j = 1:50
+    linNewsus(2*j) = Susceptible(j) + (t(j+1)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+2)-t(j)));
+    linNewsus(2*j+1) = Susceptible(j+1);   
+    linNewinf(2*j) = Infected(j) + (t(j+1)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+2)-t(j)));
+    linNewinf(2*j+1) = Infected(j+1);
+    linNewrec(2*j) = Recovered(j) + (t(j+1)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+2)-t(j)));
+    linNewrec(2*j+1) = Recovered(j+1);
+
+    quadNewsus(2*j) =  Susceptible(j) + (t(j+1)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+2)-t(j))) + ((((Susceptible(j+2)-Susceptible(j+1))/(t(j+4)-t(j+2)))-(Susceptible(j+1)-Susceptible(j))/(t(j+2)-t(j)))/(t(j+4)-t(j)))*(t(j+1)-t(j))*(t(j+1)-t(j+2));
+    quadNewsus(2*j+1) = Susceptible(j+1);  
+   
+end
