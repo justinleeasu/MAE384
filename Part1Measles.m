@@ -18,23 +18,36 @@ Infected(1) = 10;
 Recovered(1) = 0;
 
 N = Susceptible(1)+Infected(1)+Recovered(1);
+dS = @(T,S,I) (-Beta/N)*S*I;
+dI = @(T,I,S) (Beta/N)*S*I - Gamma*I;
+dR = @(T,R,I) Gamma*I;
+L = zeros(1,n+1);
+L(1) = Susceptible(1)+Infected(1)+Recovered(1);
 
 for i = 1:n
-    dS = @(T,S) (-Beta./N)*S*Infected(i);
-    dI = @(T,I) (Beta./N)*Susceptible(i)*I - Gamma*I;
-    dR = @(T,I) Gamma*Infected(i);
     T(i+1) = T(i)+h;
-    Susceptible(i+1) = RungeKutta(dS,T(i),Susceptible(i),h);
-    Infected(i+1) = RungeKutta(dI,T(i),Infected(i),h);
-    Recovered(i+1) = RungeKutta(dR,T(i),Recovered(i),h);
-end
 
-function [X] = RungeKutta(dYdX,Xi,Yi,h)
-    k1 = dYdX(Xi,Yi);
-    k2 = dYdX(Xi+0.5*h,Yi+0.5*k1*h);
-    k3 = dYdX(Xi+0.5*h,Yi+0.5*k2*h);
-    k4 = dYdX(Xi+h,Yi+k3*h);
-    X = Yi + (1/6)*(k1+2*k2+2*k3+k4)*h;
+    k1s = dS(T(i),Susceptible(i),Infected(i));
+    k1i = dI(T(i),Infected(i),Susceptible(i));
+    k1r = dR(T(i),Recovered(i),Infected(i));
+
+    k2s = dS(T(i)+0.5*h,Susceptible(i)+0.5*k1s*h,Infected(i)+0.5*k1i*h);
+    k2i = dI(T(i)+0.5*h,Infected(i)+0.5*k1i*h,Susceptible(i)+0.5*k1s*h);
+    k2r = dR(T(i)+0.5*h,Recovered(i)+0.5*k1r*h,Infected(i)+0.5*k1i*h);
+
+    k3s = dS(T(i)+0.5*h,Susceptible(i)+0.5*k2s*h,Infected(i)+0.5*k2i*h);
+    k3i = dI(T(i)+0.5*h,Infected(i)+0.5*k2i*h,Susceptible(i)+0.5*k2s*h);
+    k3r = dR(T(i)+0.5*h,Recovered(i)+0.5*k2r*h,Infected(i)+0.5*k2i*h);
+
+    k4s = dS(T(i)+h,Susceptible(i)+k3s*h,Infected(i)+k3i*h);
+    k4i = dI(T(i)+h,Infected(i)+k3i*h,Susceptible(i)+k3i*h);
+    k4r = dR(T(i)+h,Recovered(i)+k3r*h,Infected(i)+k4i*h);
+
+    Susceptible(i+1) = Susceptible(i) + (1/6)*(k1s+2*k2s+2*k3s+k4s)*h;
+    Infected(i+1) = Infected(i) + (1/6)*(k1i+2*k2i+2*k3i+k4i)*h;
+    Recovered(i+1) = Recovered(i) + (1/6)*(k1r+2*k2r+2*k3r+k4r)*h;
+
+    L(i+1) = Susceptible(i+1)+Infected(i+1)+Recovered(i+1);
 end
 
 figure(1);
