@@ -15,56 +15,72 @@ linNewinf(1) = 10;
 linNewrec = zeros(1,b+1);
 linNewrec(1) = 0;
 
-quadNewsus = zeros(1,b+1);
-quadNewsus(1) = 990;
+quadlinNewsus = zeros(1,b+1);
+quadlinNewsus(1) = 990;
 quadlinNewinf = zeros(1,b+1);
 quadlinNewinf(1) = 10;
 quadlinNewrec = zeros(1,b+1);
 quadlinNewrec(1) = 0;
 
 
-T = zeros(1,n+1);
-T(1) = a;
-t = 0:1:100;
+t = 0:h:102;
+todd = 1:h:99;
+days = 0:h:100;
 
-Susceptible = zeros(1,n+1);
-Infected = zeros(1,n+1);
-Recovered = zeros(1,n+1);
+Susceptible = zeros(1,length(days));
+Infected = zeros(1,length(days));
+Recovered = zeros(1,length(days));
 Susceptible(1) = 990;
 Infected(1) = 10;
 Recovered(1) = 0;
 
+S_model = zeros(1,length(todd));
+
 N = Susceptible(1)+Infected(1)+Recovered(1);
 
-for i = 1:n
-    dS = @(T,S) (-Beta/N)*S*Infected(i);
-    dI = @(T,I) (Beta/N)*Susceptible(i)*I - Gamma*I;
-    dR = @(T,I) Gamma*Infected(i);
-    T(i+1) = T(i)+h;
-    Susceptible(i+1) = RungeKutta(dS,T(i),Susceptible(i),h);
-    Infected(i+1) = RungeKutta(dI,T(i),Infected(i),h);
-    Recovered(i+1) = RungeKutta(dR,T(i),Recovered(i),h);
-   
+for i = 1:length(days)
+    k1_S = -Beta*Susceptible(i)*Infected(i)/N;
+    k1_I = Beta*Susceptible(i)*Infected(i)/N - Gamma*Infected(i);
+    k1_R = Gamma*Infected(i);
+
+    k2_S = -Beta*(Susceptible(i) + 0.5*h*k1_S)*(Infected(i) + 0.5*h*k1_I)/N;
+    k2_I = Beta*(Susceptible(i) + 0.5*h*k1_S)*(Infected(i) + 0.5*h*k1_I)/N - Gamma*(Infected(i) + 0.5*h*k1_I);
+    k2_R = Gamma*(Infected(i) + 0.5*h*k1_I);
+
+    k3_S = -Beta*(Susceptible(i) + 0.5*h*k2_S)*(Infected(i) + 0.5*h*k2_I)/N;
+    k3_I = Beta*(Susceptible(i) + 0.5*h*k2_S)*(Infected(i) + 0.5*h*k2_I)/N - Gamma*(Infected(i) + 0.5*h*k2_I);
+    k3_R = Gamma*(Infected(i) + 0.5*h*k2_I);
+
+    k4_S = -Beta*(Susceptible(i) + h*k3_S)*(Infected(i) + h*k3_I)/N;
+    k4_I = Beta*(Susceptible(i) + h*k3_S)*(Infected(i) + h*k3_I)/N - Gamma*(Infected(i) + h*k3_I);
+    k4_R = Gamma*(Infected(i) + h*k3_I);
+
+    Susceptible(i+1) = Susceptible(i) + (h/6)*(k1_S + 2*k2_S + 2*k3_S + k4_S);
+    Infected(i+1) = Infected(i) + (h/6)*(k1_I + 2*k2_I+ 2*k3_I + k4_I);
+    Recovered(i+1) = Recovered(i) + (h/6)*(k1_R + 2*k2_R + 2*k3_R + k4_R);
+
 end
 
-function [X] = RungeKutta(dYdX,Xi,Yi,h)
-    k1 = dYdX(Xi,Yi);
-    k2 = dYdX(Xi+0.5*h,Yi+0.5*k1*h);
-    k3 = dYdX(Xi+0.5*h,Yi+0.5*k2*h);
-    k4 = dYdX(Xi+h,Yi+k3*h);
-    X = Yi + (1/6)*(k1+2*k2+2*k3+k4)*h;
-end
+L = Susceptible + Infected + Recovered; % checks N=1000
 
-
-for j = 1:50
-    linNewsus(2*j) = Susceptible(j) + (t(j+1)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+2)-t(j)));
+for j = 1:n
+    % Newton Linear Interpolation 
+    linNewsus(2*j) = Susceptible(j) + (todd(j)-t(j))*((Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j)));
     linNewsus(2*j+1) = Susceptible(j+1);   
-    linNewinf(2*j) = Infected(j) + (t(j+1)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+2)-t(j)));
+    linNewinf(2*j) = Infected(j) + (todd(j)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+1)-t(j)));
     linNewinf(2*j+1) = Infected(j+1);
-    linNewrec(2*j) = Recovered(j) + (t(j+1)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+2)-t(j)));
+    linNewrec(2*j) = Recovered(j) + (todd(j)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+1)-t(j)));
     linNewrec(2*j+1) = Recovered(j+1);
+    
+    % Newton Quadratic Interpolation 
+    quadlinNewsus(2*j) =  Susceptible(j) + (todd(j)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j))) + ((((Susceptible(j+2)-Susceptible(j+1))/(t(j+2)-t(j+1)))-(Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
+    quadlinNewsus(2*j+1) = Susceptible(j+1);  
+    quadlinNewinf(2*j) =  Infected(j) + (todd(j)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+1)-t(j))) + ((((Infected(j+2)-Infected(j+1))/(t(j+2)-t(j+1)))-(Infected(j+1)-Infected(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
+    quadlinNewinf(2*j+1) = Infected(j+1);  
+    quadlinNewrec(2*j) =  Recovered(j) + (todd(j)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+1)-t(j))) + ((((Recovered(j+2)-Recovered(j+1))/(t(j+2)-t(j+1)))-(Recovered(j+1)-Recovered(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
+    quadlinNewrec(2*j+1) = Recovered(j+1);  
 
-    quadNewsus(2*j) =  Susceptible(j) + (t(j+1)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+2)-t(j))) + ((((Susceptible(j+2)-Susceptible(j+1))/(t(j+4)-t(j+2)))-(Susceptible(j+1)-Susceptible(j))/(t(j+2)-t(j)))/(t(j+4)-t(j)))*(t(j+1)-t(j))*(t(j+1)-t(j+2));
-    quadNewsus(2*j+1) = Susceptible(j+1);  
-   
 end
+
+L2 = linNewsus + linNewinf + linNewrec; % checks N=1000
+L3 = quadlinNewsus + quadlinNewinf + quadlinNewrec; % checks N=1000;
