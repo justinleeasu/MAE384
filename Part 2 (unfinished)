@@ -5,27 +5,14 @@ Gamma = 0.1;
 
 a = 1;
 b = 100;
-h = 2;
+h = 2; % Coarser step size of 2
+h1 = 1; % Part 1 step size 
 n = 50;
-
-linNewsus = zeros(1,b+1);
-linNewsus(1) = 990;
-linNewinf = zeros(1,b+1);
-linNewinf(1) = 10;
-linNewrec = zeros(1,b+1);
-linNewrec(1) = 0;
-
-quadlinNewsus = zeros(1,b+1);
-quadlinNewsus(1) = 990;
-quadlinNewinf = zeros(1,b+1);
-quadlinNewinf(1) = 10;
-quadlinNewrec = zeros(1,b+1);
-quadlinNewrec(1) = 0;
-
 
 t = 0:h:102;
 todd = 1:h:99;
 days = 0:h:100;
+odd_days = 1:h1:99;
 
 Susceptible = zeros(1,length(days));
 Infected = zeros(1,length(days));
@@ -34,11 +21,10 @@ Susceptible(1) = 990;
 Infected(1) = 10;
 Recovered(1) = 0;
 
-S_model = zeros(1,length(todd));
-
 N = Susceptible(1)+Infected(1)+Recovered(1);
 
 for i = 1:length(days)
+    % Even days to be interpolated  
     k1_S = -Beta*Susceptible(i)*Infected(i)/N;
     k1_I = Beta*Susceptible(i)*Infected(i)/N - Gamma*Infected(i);
     k1_R = Gamma*Infected(i);
@@ -61,26 +47,92 @@ for i = 1:length(days)
 
 end
 
-L = Susceptible + Infected + Recovered; % checks N=1000
+%L = Susceptible + Infected + Recovered; % checks N=1000
+
+linNewsus = zeros(1,n);
+linNewsus(1) = 990;
+linNewinf = zeros(1,n);
+linNewinf(1) = 10;
+linNewrec = zeros(1,n);
+linNewrec(1) = 0;
+
+quadlinNewsus = zeros(1,n);
+quadlinNewsus(1) = 990;
+quadlinNewinf = zeros(1,n);
+quadlinNewinf(1) = 10;
+quadlinNewrec = zeros(1,n);
+quadlinNewrec(1) = 0;
 
 for j = 1:n
     % Newton Linear Interpolation 
-    linNewsus(2*j) = Susceptible(j) + (todd(j)-t(j))*((Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j)));
-    linNewsus(2*j+1) = Susceptible(j+1);   
-    linNewinf(2*j) = Infected(j) + (todd(j)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+1)-t(j)));
-    linNewinf(2*j+1) = Infected(j+1);
-    linNewrec(2*j) = Recovered(j) + (todd(j)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+1)-t(j)));
-    linNewrec(2*j+1) = Recovered(j+1);
+    linNewsus(j) = Susceptible(j) + (todd(j)-t(j))*((Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j)));
+    linNewinf(j) = Infected(j) + (todd(j)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+1)-t(j)));
+    linNewrec(j) = Recovered(j) + (todd(j)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+1)-t(j)));
     
     % Newton Quadratic Interpolation 
-    quadlinNewsus(2*j) =  Susceptible(j) + (todd(j)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j))) + ((((Susceptible(j+2)-Susceptible(j+1))/(t(j+2)-t(j+1)))-(Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
-    quadlinNewsus(2*j+1) = Susceptible(j+1);  
-    quadlinNewinf(2*j) =  Infected(j) + (todd(j)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+1)-t(j))) + ((((Infected(j+2)-Infected(j+1))/(t(j+2)-t(j+1)))-(Infected(j+1)-Infected(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
-    quadlinNewinf(2*j+1) = Infected(j+1);  
-    quadlinNewrec(2*j) =  Recovered(j) + (todd(j)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+1)-t(j))) + ((((Recovered(j+2)-Recovered(j+1))/(t(j+2)-t(j+1)))-(Recovered(j+1)-Recovered(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
-    quadlinNewrec(2*j+1) = Recovered(j+1);  
+    quadlinNewsus(j) =  Susceptible(j) + (todd(j)-(t(j)))*((Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j))) + ((((Susceptible(j+2)-Susceptible(j+1))/(t(j+2)-t(j+1)))-(Susceptible(j+1)-Susceptible(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
+    quadlinNewinf(j) =  Infected(j) + (todd(j)-(t(j)))*((Infected(j+1)-Infected(j))/(t(j+1)-t(j))) + ((((Infected(j+2)-Infected(j+1))/(t(j+2)-t(j+1)))-(Infected(j+1)-Infected(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
+    quadlinNewrec(j) =  Recovered(j) + (todd(j)-(t(j)))*((Recovered(j+1)-Recovered(j))/(t(j+1)-t(j))) + ((((Recovered(j+2)-Recovered(j+1))/(t(j+2)-t(j+1)))-(Recovered(j+1)-Recovered(j))/(t(j+1)-t(j)))/(t(j+2)-t(j)))*(todd(j)-t(j))*(todd(j)-t(j+1));
 
 end
 
-L2 = linNewsus + linNewinf + linNewrec; % checks N=1000
-L3 = quadlinNewsus + quadlinNewinf + quadlinNewrec; % checks N=1000;
+%L2 = linNewsus + linNewinf + linNewrec; % checks N=1000
+%L3 = quadlinNewsus + quadlinNewinf + quadlinNewrec; % checks N=1000;
+
+S_model = zeros(1,length(days));
+I_model = zeros(1,length(days));
+R_model = zeros(1,length(days));
+S_model(1) = 990;
+I_model(1) = 10;
+R_model(1) = 0;
+
+for k = 1:length(odd_days)
+    % Odd days to be modeled about  
+    K1_S = -Beta*S_model(k)*I_model(k)/N;
+    K1_I = Beta*S_model(k)*I_model(k)/N - Gamma*I_model(k);
+    K1_R = Gamma*I_model(k);
+
+    K2_S = -Beta*(S_model(k) + 0.5*h1*K1_S)*(I_model(k) + 0.5*h1*K1_I)/N;
+    K2_I = Beta*(S_model(k) + 0.5*h1*K1_S)*(I_model(k) + 0.5*h1*K1_I)/N - Gamma*(I_model(k) + 0.5*h1*K1_I);
+    K2_R = Gamma*(I_model(k) + 0.5*h1*K1_I);
+
+    K3_S = -Beta*(S_model(k) + 0.5*h1*K2_S)*(I_model(k) + 0.5*h1*K2_I)/N;
+    K3_I = Beta*(S_model(k) + 0.5*h1*K2_S)*(I_model(k) + 0.5*h1*K2_I)/N - Gamma*(I_model(k) + 0.5*h1*K2_I);
+    K3_R = Gamma*(I_model(k) + 0.5*h1*K2_I);
+
+    K4_S = -Beta*(S_model(k) + h1*K3_S)*(I_model(k) + h1*K3_I)/N;
+    K4_I = Beta*(S_model(k) + h1*K3_S)*(I_model(k) + h1*K3_I)/N - Gamma*(I_model(k) + h1*K3_I);
+    K4_R = Gamma*(I_model(k) + h1*K3_I);
+
+    S_model(k+1) = S_model(k) + (h1/6)*(K1_S + 2*K2_S + 2*K3_S + K4_S);
+    I_model(k+1) = I_model(k) + (h1/6)*(K1_I + 2*K2_I+ 2*K3_I + K4_I);
+    R_model(k+1) = R_model(k) + (h1/6)*(K1_R + 2*K2_R + 2*K3_R + K4_R);
+
+end
+%L_model = S_model + I_model + R_model; % checks N=1000
+
+S_model = S_model(2:2:end); % Updates matrix to only stores odd days
+I_model = I_model(2:2:end);
+R_model = R_model(2:2:end);
+
+
+Nint = length(todd);
+% L2 Error for Newton Linear Interpolation Method
+EL2_linear_Susceptible = sqrt((sum((linNewsus-S_model).^2))/Nint);
+EL2_linear_Infected = sqrt((sum((linNewinf-I_model).^2))/Nint);
+EL2_linear_Recovered = sqrt((sum((linNewrec-R_model).^2))/Nint);
+
+% L2 Error for Newton Quadratic Interpolation Method
+EL2_quadratic_Susceptible = sqrt((sum((quadlinNewsus-S_model).^2))/Nint);
+EL2_quadratic_Infected = sqrt((sum((quadlinNewinf-I_model).^2))/Nint);
+EL2_quadratic_Recovered = sqrt((sum((quadlinNewrec-R_model).^2))/Nint);
+
+EL2 = [EL2_linear_Susceptible, EL2_linear_Infected, EL2_linear_Recovered;EL2_quadratic_Susceptible, EL2_quadratic_Infected, EL2_quadratic_Recovered];
+disp('L2 Errors for Linear and Quadratic Interpolation:');
+disp(array2table(EL2, 'VariableNames', {'S(t)', 'I(t)', 'R(t)'}, 'RowNames', {'Linear', 'Quadratic'}));
+
+% Quadratic interpolation provides smaller errors because it utlizes three
+% points instead of two which allows for a better approximation to the
+% behavior of the function.The downside to this method is that since it
+% utlizes 3 points, the one to the left two to the right method had to be
+% used with an extra data point at day 102. 
