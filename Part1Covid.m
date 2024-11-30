@@ -21,8 +21,6 @@ N = Susceptible(1)+Infected(1)+Recovered(1);
 dS = @(T,S,I) (-Beta/N)*S*I;
 dI = @(T,I,S) (Beta/N)*S*I - Gamma*I;
 dR = @(T,R,I) Gamma*I;
-L = zeros(1,n+1);
-L(1) = Susceptible(1)+Infected(1)+Recovered(1);
 
 for i = 1:n
     T(i+1) = T(i)+h;
@@ -40,14 +38,12 @@ for i = 1:n
     k3r = dR(T(i)+0.5*h,Recovered(i)+0.5*k2r*h,Infected(i)+0.5*k2i*h);
 
     k4s = dS(T(i)+h,Susceptible(i)+k3s*h,Infected(i)+k3i*h);
-    k4i = dI(T(i)+h,Infected(i)+k3i*h,Susceptible(i)+k3i*h);
-    k4r = dR(T(i)+h,Recovered(i)+k3r*h,Infected(i)+k4i*h);
+    k4i = dI(T(i)+h,Infected(i)+k3i*h,Susceptible(i)+k3s*h);
+    k4r = dR(T(i)+h,Recovered(i)+k3r*h,Infected(i)+k3i*h);
 
     Susceptible(i+1) = Susceptible(i) + (1/6)*(k1s+2*k2s+2*k3s+k4s)*h;
     Infected(i+1) = Infected(i) + (1/6)*(k1i+2*k2i+2*k3i+k4i)*h;
     Recovered(i+1) = Recovered(i) + (1/6)*(k1r+2*k2r+2*k3r+k4r)*h;
-
-    L(i+1) = Susceptible(i+1)+Infected(i+1)+Recovered(i+1);
 end
 
 figure(1);
