@@ -53,3 +53,6 @@ plot(T,Infected,'g','LineWidth',2);
 plot(T,Recovered,'b','LineWidth',2);
 hold off
 legend('Susceptible','Infected','Recovered');
+
+fprintf('Changing the Beta value affects how quickly the susceptible value decreases. Making the Beta value larger will\nmake the susceptible value decrease quickly, and making the Beta value smaller will make the susceptible value\ndecrease slower.')
+fprintf('\n\nChanging the Gamma value affects the speed and rate at which individuals get infected as well as the recovery\nspeed and rate. Making the Gamma value higher will slow down the infected rate and quantity and increase the\nrecovery rate. This makes sense based on what we know about what Gamma means.')
