@@ -68,7 +68,7 @@ for j = 1:length(b)
     B(j) = (A1+Gamma)*(N/Susceptible(1));
 end
 
-fprintf('The setimation of initial infected for T = 30 is %4.4f\n', I0(1));
+fprintf('The estimation of initial infected for T = 30 is %4.4f\n', I0(1));
 fprintf('The estimation of initial infected for T = 10 is %4.4f\n', I0(2));
 fprintf('The estimation of beta for T = 10 is %4.4f\n', B(1));
 fprintf('The estimation of beta for T = 10 is %4.4f\n', B(2));
