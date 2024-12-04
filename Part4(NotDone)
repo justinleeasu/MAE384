@@ -1,0 +1,90 @@
+Beta0 = 0.3; 
+A = 5;       
+omega = 2 * pi * (365/365);
+Gamma = 0.1; 
+
+a = 0;      
+b = 30; 
+h = 0.1;    
+n = (b-a)/h;
+n = n+1;
+
+
+T = zeros(1,n+1);
+T(1) = a;
+Susceptible = zeros(1,n+1);
+Infected = zeros(1,n+1);
+Recovered = zeros(1,n+1);
+
+Susceptible(1) = 990;
+Infected(1) = 10;
+Recovered(1) = 0;
+N = Susceptible(1) + Infected(1) + Recovered(1);
+
+dS = @(t,S,I,beta) (-beta/N) * S * I;
+dI = @(t,S,I,beta) (beta/N) * S * I - Gamma * I;
+dR = @(t,I) Gamma * I;
+
+for i = 1:n
+    T(i+1) = T(i) + h;
+
+    beta = Beta0 * (1 + A * sin(omega * T(i))); 
+
+    k1s = dS(T(i), Susceptible(i), Infected(i), beta);
+    k1i = dI(T(i), Susceptible(i), Infected(i), beta);
+    k1r = dR(T(i), Infected(i));
+
+    k2s = dS(T(i)+0.5*h, Susceptible(i)+0.5*k1s*h, Infected(i)+0.5*k1i*h, beta);
+    k2i = dI(T(i)+0.5*h, Susceptible(i)+0.5*k1s*h, Infected(i)+0.5*k1i*h, beta);
+    k2r = dR(T(i)+0.5*h, Infected(i)+0.5*k1i*h);
+
+    k3s = dS(T(i)+0.5*h, Susceptible(i)+0.5*k2s*h, Infected(i)+0.5*k2i*h, beta);
+    k3i = dI(T(i)+0.5*h, Susceptible(i)+0.5*k2s*h, Infected(i)+0.5*k2i*h, beta);
+    k3r = dR(T(i)+0.5*h, Infected(i)+0.5*k2i*h);
+
+    k4s = dS(T(i)+h, Susceptible(i)+k3s*h, Infected(i)+k3i*h, beta);
+    k4i = dI(T(i)+h, Susceptible(i)+k3s*h, Infected(i)+k3i*h, beta);
+    k4r = dR(T(i)+h, Infected(i)+k3i*h);
+
+    Susceptible(i+1) = Susceptible(i) + (1/6)*(k1s + 2*k2s + 2*k3s + k4s)*h;
+    Infected(i+1) = Infected(i) + (1/6)*(k1i + 2*k2i + 2*k3i + k4i)*h;
+    Recovered(i+1) = Recovered(i) + (1/6)*(k1r + 2*k2r + 2*k3r + k4r)*h;
+end
+
+figure(1);
+plot(T,Susceptible,'r','LineWidth',2);
+hold on
+plot(T,Infected,'g','LineWidth',2);
+plot(T,Recovered,'b','LineWidth',2);
+hold off
+legend('Susceptible','Infected','Recovered');
+
+
+L = length(T); 
+T_total = T(end) - T(1); 
+
+fft_S = fft(Susceptible) /L;
+fft_I = fft(Infected) / L;  
+fft_R = fft(Recovered) / L; 
+
+P2_S = abs(fft_S);
+P2_I = abs(fft_I); 
+P2_R = abs(fft_R);
+
+N_half = floor(L/2);      
+P1_S = P2_S(1:N_half+1);   
+P1_I = P2_I(1:N_half+1);   
+P1_R = P2_R(1:N_half+1);   
+
+P1_S(2:end-1) = 2 * P1_S(2:end-1);
+P1_I(2:end-1) = 2 * P1_I(2:end-1);
+P1_R(2:end-1) = 2 * P1_R(2:end-1);
+
+f = (0:N_half) / T_total; 
+
+figure;
+plot(f, P1_I, 'g', 'LineWidth', 1.5);
+xlabel('Frequency (1/day)');
+ylabel('|I(f)|');
+title('Frequency Spectrum of Infected Cases');
+grid on;
