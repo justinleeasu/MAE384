@@ -56,6 +56,7 @@ plot(T,Susceptible,'r','LineWidth',2);
 hold on
 plot(T,Infected,'g','LineWidth',2);
 plot(T,Recovered,'b','LineWidth',2);
+xlim([0 30]);
 hold off
 legend('Susceptible','Infected','Recovered');
 
