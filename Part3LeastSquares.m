@@ -70,7 +70,7 @@ end
 
 fprintf('The estimation of initial infected for T = 30 is %4.4f\n', I0(1));
 fprintf('The estimation of initial infected for T = 10 is %4.4f\n', I0(2));
-fprintf('The estimation of beta for T = 10 is %4.4f\n', B(1));
+fprintf('The estimation of beta for T = 30 is %4.4f\n', B(1));
 fprintf('The estimation of beta for T = 10 is %4.4f\n', B(2));
 fprintf('The true value for initial infected is %4.1f\n',Infected(1));
 fprintf('The true value for beta is %4.1f\n',Beta);
