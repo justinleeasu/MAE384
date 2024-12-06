@@ -94,4 +94,8 @@ title('Frequency Spectrum of Infected Cases');
 xlim([0 5]);
 grid on;
 
+% The frequency peaks at rouhgly 1/3, making it shift lower than the previous omega. This makes sense physically
+% because of the same, occuring earlier in the day with more human activity leading to this spike.
+% The Sooner freaquncy spike shows people getting infected and then the
+% virus dying and plateauing 
 
