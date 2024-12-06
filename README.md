@@ -6,7 +6,7 @@
 
 Part Numbers -------------- Conceptual Problem ----------------------- Contributers
 -----------------------------------------------------------------------------------
-Part 1 ---- Numerical Solutions of ODE Systems ------ Dominic Trujillo, Devan Samra
+Part 1 --- Numerical Solutions of ODE Systems ------ Dominic Trujillo, Devan Samra
 Part 2 ---------------- Interpolation --------------------- Justin Lee, Devan Samra
 Part 3 ---------------- Least Squares ---------------------------- Dominic Trujillo
 Part 4 -------------- Fourier Transform ------------------ Jayden Chao, Devan Samra
