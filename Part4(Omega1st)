@@ -60,6 +60,8 @@ xlim([0 30]);
 hold off
 legend('Susceptible','Infected','Recovered');
 
+% Yes there are periodicity in the susceptitble and the infected lines due
+% to them having beta in their function.
 
 L = length(T); 
 T_total = T(end) - T(1); 
@@ -90,3 +92,8 @@ ylabel('|I(f)|');
 title('Frequency Spectrum of Infected Cases');
 xlim([0 5]);
 grid on;
+
+% The frequency peaks at 1 and this makes sense physcially because this
+% indicates an increase in suspetiablity likely occuring earlier in the day
+% with more human activity leading to this spike. This also shows  proof of
+% transmission rates with the infection.
